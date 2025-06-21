@@ -19,9 +19,9 @@ def get_color():
     return c
 
 
-##########
+##################################################
 # Funciones para calcular funciones matematicas
-##########
+##################################################
 
 # Genera el resultado (y) de una funcion lineal
 # Puede añadir aleatoriedad al resultado para utilizarlo para hacer un analisis de regresion
@@ -37,7 +37,7 @@ def gen_lineal(x, a, b, noise=0., n_outliers=0, seed=None):
 
     return y + error
 
-
+#Polinomial
 def gen_polinomial(x, b0=0, b1=0, b2=0, b3=0, b4=0, b5=0, b6=0, noise=0., n_outliers=0, seed=None):
     rng = default_rng(seed)
 
@@ -50,6 +50,33 @@ def gen_polinomial(x, b0=0, b1=0, b2=0, b3=0, b4=0, b5=0, b6=0, noise=0., n_outl
 
     return y + error
 
+#Exponencial
+def gen_exponencial(x, b, m, noise=0., n_outliers=0, seed=None):
+    rng = default_rng(seed)
+
+    y = b * pow(math.e, m * x)
+
+    #Agregar variacion
+    error = noise * rng.standard_normal(x.size)
+    outliers = rng.integers(0, x.size, n_outliers)
+    error[outliers] *= 10
+
+    return y + error
+
+#Potencia
+def gen_potencia(x, b, m, noise=0., n_outliers=0, seed=None):
+    rng = default_rng(seed)
+
+    y = b * pow(x,m)
+
+    #Agregar variacion
+    error = noise * rng.standard_normal(x.size)
+    outliers = rng.integers(0, x.size, n_outliers)
+    error[outliers] *= 10
+
+    return y + error
+
+#Logistica
 def gen_log(x, b, m1, m2, noise=0., n_outliers=0, seed=None):
     rng = default_rng(seed)
 
@@ -69,9 +96,9 @@ x_obs = np.array([0,1,2,3])
 y_obs = np.array([1,3,5,7])
 
 
-######
-# Funciones para hacer analisis de regresion a partir de las variables globales con los datos observados
-######
+###########################################################################################################
+# Funciones para hacer analisis de regresion a partir de y_obs y x_obs
+###########################################################################################################33
 
 #### Lineal
 
@@ -108,19 +135,61 @@ def polinomial_string(variables):
     return label
 
 def calcular_polinomial(n, f=0, start=None, end=None):
-    x0 = [1,1,1,1]   
+    x0 = [1]*n 
     x_local = x_obs[start:end]
     y_local = y_obs[start:end]
     if f == 0:
         f = max(y_local)*10
         print(f)
     resultado = least_squares(polinomial_err, x0, args=(x_local, y_local), loss='soft_l1', f_scale=f)
-    y_estimado = gen_polinomial(x_obs, *resultado.x)    
-    plt.plot(x_obs, y_estimado, c=get_color(), lw=2, label=polinomial_string(resultado.x))
+    y_estimado = gen_polinomial(x_local, *resultado.x)    
+    plt.plot(x_local, y_estimado, c=get_color(), lw=2, label=polinomial_string(resultado.x))
     print(resultado.x)
 
+#Exponencial
 
-#logistica
+def exponencial_err(variables, x, y):                 
+    return variables[0] * pow(math.e, variables[1] * x) - y
+
+def exponencial_string(variables):    
+    return f"y = {variables[0]:.2f} * e^{variables[1]:.5f}*x"    
+
+def calcular_exponencial(f=0, start=None, end=None):
+    x0 = [0,0]
+    x_local = x_obs[start:end]
+    y_local = y_obs[start:end]
+    if f == 0:
+        f = max(y_local)*10
+        print(f)
+            
+    resultado = least_squares(exponencial_err, x0, args=(x_local, y_local), loss='soft_l1', f_scale=f)
+    y_estimado = gen_exponencial(x_local, *resultado.x)    
+    plt.plot(x_local, y_estimado, c=get_color(), lw=2, label=exponencial_string(resultado.x))
+    print(resultado.x)
+
+#Potencia
+
+def potencia_err(variables, x, y):                 
+    return variables[0] * pow(x, variables[1]) - y
+
+def potencia_string(variables):    
+    return f"y = {variables[0]:.2f} * x^{variables[1]:.2f}"    
+
+def calcular_potencia(f=0, start=None, end=None):
+    x0 = [0,0]
+    x_local = x_obs[start:end]
+    y_local = y_obs[start:end]
+    if f == 0:
+        f = max(y_local)
+        print(f)
+            
+    resultado = least_squares(potencia_err, x0, args=(x_local, y_local), loss='soft_l1', f_scale=f)
+    y_estimado = gen_potencia(x_local, *resultado.x)    
+    plt.plot(x_local, y_estimado, c=get_color(), lw=2, label=potencia_string(resultado.x))
+    print(resultado.x)
+
+#Logistica
+#No sirve
 
 def log_err(variables, x, y):                 
     return variables[1] / (1 + pow(math.e, -variables[2]* (x + variables[0]))) - y
