@@ -110,13 +110,17 @@ def linear_err(variables, x, y):
 # Calcula una regresion lineal a partir de los datos observados
 # Y añade la linea al grafico para que se muestre al ejecutar plot()
 # Acepta un rango para hacer el analisis en una zona especifica
-def calcular_lineal(start=None, end=None):
+def calcular_lineal(start=None, end=None, extend=True):
     x0 = [0,0]
     x_local = x_obs[start:end]
     y_local = y_obs[start:end]
     resultado = least_squares(linear_err, x0, args=(x_local, y_local))
-    y_estimado = gen_lineal(x_local, *resultado.x)    
-    plt.plot(x_local, y_estimado, c=get_color(), lw=3, label=f"y = {resultado.x[0]:.2f} + {resultado.x[1]:.2f} * x ")
+    y_estimado = gen_lineal(x_obs, *resultado.x)    
+    c=get_color()
+    plt.plot(x_local, y_estimado[start:end], c=c, lw=2, label=f"y = {resultado.x[0]:.2f} + {resultado.x[1]:.2f} * x ")
+    if extend:
+        plt.plot(x_obs[:start], y_estimado[:start], c=c, linestyle="dashed")
+        plt.plot(x_obs[end:], y_estimado[end:], c=c, linestyle="dashed")
     print(resultado.x)
 
 
@@ -134,7 +138,7 @@ def polinomial_string(variables):
         label += f"{b:.1f}*x^{i} + "
     return label
 
-def calcular_polinomial(n, f=0, start=None, end=None):
+def calcular_polinomial(n, f=0, start=None, end=None, extend=True):
     x0 = [1]*n 
     x_local = x_obs[start:end]
     y_local = y_obs[start:end]
@@ -142,8 +146,12 @@ def calcular_polinomial(n, f=0, start=None, end=None):
         f = max(y_local)*10
         print(f)
     resultado = least_squares(polinomial_err, x0, args=(x_local, y_local), loss='soft_l1', f_scale=f)
-    y_estimado = gen_polinomial(x_local, *resultado.x)    
-    plt.plot(x_local, y_estimado, c=get_color(), lw=2, label=polinomial_string(resultado.x))
+    y_estimado = gen_polinomial(x_obs, *resultado.x)    
+    c=get_color()
+    plt.plot(x_local, y_estimado[start:end], c=c, lw=2, label=polinomial_string(resultado.x))
+    if extend:
+        plt.plot(x_obs[:start], y_estimado[:start], c=c, linestyle="dashed")
+        plt.plot(x_obs[end:], y_estimado[end:], c=c, linestyle="dashed")
     print(resultado.x)
 
 #Exponencial
@@ -154,7 +162,7 @@ def exponencial_err(variables, x, y):
 def exponencial_string(variables):    
     return f"y = {variables[0]:.2f} * e^{variables[1]:.5f}*x"    
 
-def calcular_exponencial(f=0, start=None, end=None):
+def calcular_exponencial(f=0, start=None, end=None, extend=True):
     x0 = [0,0]
     x_local = x_obs[start:end]
     y_local = y_obs[start:end]
@@ -162,9 +170,13 @@ def calcular_exponencial(f=0, start=None, end=None):
         f = max(y_local)*10
         print(f)
             
-    resultado = least_squares(exponencial_err, x0, args=(x_local, y_local), loss='soft_l1', f_scale=f)
-    y_estimado = gen_exponencial(x_local, *resultado.x)    
-    plt.plot(x_local, y_estimado, c=get_color(), lw=2, label=exponencial_string(resultado.x))
+    resultado = least_squares(exponencial_err, x0, args=(x_local, y_local), loss='soft_l1', f_scale=f)    
+    y_estimado = gen_exponencial(x_obs, *resultado.x)    
+    c=get_color()
+    plt.plot(x_local, y_estimado[start:end], c=c, lw=2, label=exponencial_string(resultado.x))
+    if extend:
+        plt.plot(x_obs[:start], y_estimado[:start], c=c, linestyle="dashed")
+        plt.plot(x_obs[end:], y_estimado[end:], c=c, linestyle="dashed")
     print(resultado.x)
 
 #Potencia
@@ -175,7 +187,7 @@ def potencia_err(variables, x, y):
 def potencia_string(variables):    
     return f"y = {variables[0]:.2f} * x^{variables[1]:.2f}"    
 
-def calcular_potencia(f=0, start=None, end=None):
+def calcular_potencia(f=0, start=None, end=None, extend=True):
     x0 = [0,0]
     x_local = x_obs[start:end]
     y_local = y_obs[start:end]
@@ -184,8 +196,12 @@ def calcular_potencia(f=0, start=None, end=None):
         print(f)
             
     resultado = least_squares(potencia_err, x0, args=(x_local, y_local), loss='soft_l1', f_scale=f)
-    y_estimado = gen_potencia(x_local, *resultado.x)    
-    plt.plot(x_local, y_estimado, c=get_color(), lw=2, label=potencia_string(resultado.x))
+    y_estimado = gen_potencia(x_obs, *resultado.x)    
+    c=get_color()
+    plt.plot(x_local, y_estimado[start:end], c=c, lw=2, label=potencia_string(resultado.x))
+    if extend:
+        plt.plot(x_obs[:start], y_estimado[:start], c=c, linestyle="dashed")
+        plt.plot(x_obs[end:], y_estimado[end:], c=c, linestyle="dashed")
     print(resultado.x)
 
 #Logistica
