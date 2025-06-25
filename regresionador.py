@@ -8,7 +8,8 @@ import math
 
 # Constantes
 rng = default_rng()
-colors = ['b','g','r','c','y','k','m']
+#colors = ['b','g','r','c','y','k','m']
+colors = ['y']
 current_color = 0
 
 # Funcion para obtener color de forma ciclica (probablemente innecesaria)
@@ -51,10 +52,10 @@ def gen_polinomial(x, b0=0, b1=0, b2=0, b3=0, b4=0, b5=0, b6=0, noise=0., n_outl
     return y + error
 
 #Exponencial
-def gen_exponencial(x, b, m, noise=0., n_outliers=0, seed=None):
+def gen_exponencial(x, a, b, noise=0., n_outliers=0, seed=None):
     rng = default_rng(seed)
 
-    y = b * pow(math.e, m * x)
+    y = a * pow(b, x)
 
     #Agregar variacion
     error = noise * rng.standard_normal(x.size)
@@ -89,6 +90,13 @@ def gen_log(x, b, m1, m2, noise=0., n_outliers=0, seed=None):
 
     return y + error
 
+
+def gen_reciproca(x, a, b, noise=0., n_outliers=0, seed=None):
+
+    
+    y = a + b/x
+
+    return y
  
 
 # Variables globales que tienen los datos observados para hacer el analisis de regresion
@@ -230,23 +238,26 @@ def calcular_log(f=0, start=None, end=None):
 
 
 
+
+
 #Cargar csv 
 def load_csv():
     global x_obs, y_obs
     df = pd.read_csv("japan_data.csv")
-    x_obs = df["date"]
-    y_obs = df["total_cases"]
+    x_obs = df["date"].to_numpy()
+    y_obs = df["total_cases"].to_numpy()
+    x_obs = x_obs.astype(float)
+    y_obs = y_obs.astype(float)
 
 
 # Genera un grafico con los datos de las variables globales y cualquier otro plot que
 # se haya incluido antes
 
 def plot():
-    plt.scatter(x_obs, y_obs, c=get_color())  
-    plt.legend()      
-    plt.ticklabel_format(style="plain")
-    margen_x = 0.1 * (max(x_obs)- min(x_obs))
-    margen_y = 0.1 * (max(y_obs)- min(y_obs))
-    plt.xlim(min(x_obs)-margen_x,max(x_obs)+margen_x)
-    plt.ylim(min(y_obs)-margen_y,max(y_obs)+margen_y)
+    plt.scatter(x_obs, y_obs, c='m')  
+    plt.legend()          
+    #margen_x = 0.1 * (max(x_obs)- min(x_obs))
+    #margen_y = 0.1 * (max(y_obs)- min(y_obs))
+    #plt.xlim(min(x_obs)-margen_x,max(x_obs)+margen_x)
+    #plt.ylim(min(y_obs)-margen_y,max(y_obs)+margen_y)
     plt.show()
